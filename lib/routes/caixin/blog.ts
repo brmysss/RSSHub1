@@ -67,8 +67,7 @@ async function handler(ctx) {
             pubDate: parseDate(item.publishTime, 'x'),
         }));
 
-        const items = await Promise.all(posts.map((item) => parseBlogArticle(item, cache.tryGet)));
-
+        const items = await Promise.all(posts.map((item) => cache.tryGet(item.link, () => parseBlogArticle(item))));
         return {
             title: `财新博客 - ${authorName}`,
             link,
@@ -82,15 +81,15 @@ async function handler(ctx) {
                 page: 1,
                 size: limit,
             },
-        }).json();
-        const posts = data.map((item) => ({
+        });
+        const posts = data.data.map((item) => ({
             title: item.title,
             description: item.brief,
             author: item.authorName,
             link: item.postUrl.replace('http://', 'https://'),
             pubDate: parseDate(item.publishTime, 'x'),
         }));
-        const items = await Promise.all(posts.map((item) => parseBlogArticle(item, cache.tryGet)));
+        const items = await Promise.all(posts.map((item) => cache.tryGet(item.link, () => parseBlogArticle(item))));
 
         return {
             title: `财新博客 - 全部`,
